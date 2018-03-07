@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Git", "Git", "{19FAD6DC-D699-438E-B108-EA327794CBEB}"
+	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScanMsg", "ScanMsg\ScanMsg.csproj", "{AF52633C-E8FB-4A78-9398-309979E84CA0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{4D34C61F-B22C-4084-B6EB-471A4B9C5576}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AF52633C-E8FB-4A78-9398-309979E84CA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF52633C-E8FB-4A78-9398-309979E84CA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF52633C-E8FB-4A78-9398-309979E84CA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF52633C-E8FB-4A78-9398-309979E84CA0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A55E769C-6104-4D39-BEAF-C0ED64D1C1D7}
+	EndGlobalSection
+EndGlobal
