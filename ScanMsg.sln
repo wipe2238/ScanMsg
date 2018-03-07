@@ -14,6 +14,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{4D34C61F-B22C-4084-B6EB-471A4B9C5576}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		LICENSE.md = LICENSE.md
 	EndProjectSection
 EndProject
 Global
