@@ -1,7 +1,5 @@
 // Wipe/Rotators
 
-#define TEST
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,7 +9,7 @@ using System.Text.RegularExpressions;
 
 namespace ScanMsg
 {
-    class FalloutMsg
+    public class FalloutMsg
     {
         public enum LoadStatus
         {
@@ -25,7 +23,7 @@ namespace ScanMsg
             TextTooLong,
         }
 
-        class MsgEntry
+        public class MsgEntry
         {
             public string Sound;
             public List<string> Text = new List<string>();
@@ -84,8 +82,8 @@ namespace ScanMsg
         }
 
         public readonly string Filename;
+        public Dictionary<uint,MsgEntry> Msg = new Dictionary<uint,MsgEntry>();
         protected uint MsgLast = 0;
-        Dictionary<uint,MsgEntry> Msg = new Dictionary<uint,MsgEntry>();
 
         public FalloutMsg( string filename )
         {
@@ -95,6 +93,7 @@ namespace ScanMsg
         public LoadStatus Load()
         {
             string dummy = "";
+
             return Load( ref dummy );
         }
 
@@ -102,22 +101,21 @@ namespace ScanMsg
         {
             if( !File.Exists( Filename ) )
             {
-                report = "file does not exists [" + Filename + "]";
+                report = $"file does not exists [{Filename}]";
+
                 return LoadStatus.FileDoesNotExists;
             }
 
             string[] fileLines = File.ReadAllLines( Filename );
             if( fileLines.Length == 0 )
             {
-                report = "file is empty [" + Filename + "]";
+                report = $"file is empty [{Filename}]";
+
                 return LoadStatus.FileIsEmpty;
             }
 
-            //bool blank = File.ReadAllText( filename ).Last() == '\n';
-
             uint number = 0;
             bool multi = false;
-            //string last = "";
 
             foreach( string fileLine in fileLines )
             {
@@ -132,18 +130,9 @@ namespace ScanMsg
                         report += Environment.NewLine;
 
                     report += line + Environment.NewLine;
-                    report += lineReport + " [" + Filename + ":" + number + "]";
+                    report += lineReport + $" [{Filename}:{number}]";
                 }
-
-
-                //last = line;
             }
-
-            //if( !blank )
-            //{
-            //    scanmsg.Report( last );
-            //    scanmsg.Report( new string( '-', last.Length ) + "^ blank line required [" + filename + ":" + number + "]" );
-            //}
 
             return LoadStatus.OK;
         }
@@ -164,14 +153,16 @@ namespace ScanMsg
                     if( !CheckBrackets( stripped, ref report, true ) )
                     {
                         status = LoadStatus.ExtraBracket;
+
                         return false;
                     }
 
                     int len = Msg[MsgLast].TextLen + match.Groups["text"].Value.Length;
                     if( len > 1024 )
                     {
-                        report = new string( '-', 1024 - Msg[MsgLast].TextLen ) + "^ text too long [multiline]";
+                        report = new string( '-', 1024 - Msg[MsgLast].TextLen ) + "^ text too long (multiline)";
                         status = LoadStatus.TextTooLong;
+
                         return false;
                     }
 
@@ -221,6 +212,7 @@ namespace ScanMsg
                 if( !CheckBrackets( stripped, ref report ) )
                 {
                     status = LoadStatus.ExtraBracket;
+
                     return false;
                 }
 
@@ -230,6 +222,7 @@ namespace ScanMsg
                     {
                         report = new string( '-', match.Groups[group].Index ) + "^ text between brackets";
                         status = LoadStatus.TextBetweenBracket;
+
                         return false;
                     }
                 }
@@ -238,6 +231,7 @@ namespace ScanMsg
                 {
                     report = new string( '-', match.Groups["text"].Index + 1024 ) + "^ text too long";
                     status = LoadStatus.TextTooLong;
+
                     return false;
                 }
 
@@ -246,13 +240,14 @@ namespace ScanMsg
                 if( id == uint.MaxValue )
                 {
                     status = LoadStatus.InvalidId;
+
                     return false;
                 }
 
                 if( id > 0 && Msg.ContainsKey( id ) )
                 {
                     report = new string( '-', match.Groups["id"].Index ) + "^ duplicated id";
-                    report += " [previous: {" + id + "}" + Msg[id].AsString( 15 ) + "]";
+                    report += " (previous: {" + id + "}" + Msg[id].AsString( 15 ) + ")";
                     status = LoadStatus.DuplicatedId;
 
                     return false;
@@ -274,6 +269,7 @@ namespace ScanMsg
                 if( re.GroupNameFromNumber( g ).StartsWith( groupsToSpace ) )
                 {
                     result += " ";
+
                     continue;
                 }
                 result += match.Groups[g].Value;
@@ -294,7 +290,8 @@ namespace ScanMsg
 
                 report += " bracket not allowed here";
                 if( multi )
-                    report += " [multiline]";
+                    report += " (multiline)";
+
                 return false;
             }
 
@@ -310,6 +307,7 @@ namespace ScanMsg
                 !uint.TryParse( group.Value, out id ) )
             {
                 report = new string( '-', group.Index ) + "^ invalid id";
+
                 return uint.MaxValue;
             }
 
@@ -322,11 +320,7 @@ namespace ScanMsg
 
             foreach( KeyValuePair<uint, MsgEntry> kv in Msg.OrderBy( d => d.Key ) )
             {
-                uint id = kv.Key;
-                MsgEntry msg = kv.Value;
-                char[] trims = new char[] { ' ', '\t', '\n', '\r' };
-
-                result += "{" + id + "}" + msg.AsString();
+                result += "{" + kv.Key + "}" + kv.Value.AsString();
                 result += Environment.NewLine;
             }
 
@@ -334,29 +328,19 @@ namespace ScanMsg
         }
     }
 
-    class ScanMsg
+    public class ScanMsg
     {
-        static string ReportFile = "ScanMsg.log";
+        public static string ReportFile = "ScanMsg.log";
 
-        static void Main( string[] args )
+        private static void Main( string[] args )
         {
-#if TEST
-            if( !Debugger.IsAttached )
-            {
-                Report( "!!!" );
-                Report( "!!! Running test version of scanmsg" );
-                Report( "!!! You should expect bugs, crashes, and other ~funny~ stuff" );
-                Report( "!!!" );
-            }
-#endif
-
             Console.Write( "Scanning files..." );
 
             if( File.Exists( ReportFile ) )
                 File.Delete( ReportFile );
 
             string[] files = Directory.GetFiles( ".", "*.msg", SearchOption.AllDirectories ).OrderBy( f => f ).ToArray();
-            Console.WriteLine( " {0} found", files.Length );
+            Console.WriteLine( $" {files.Length} found" );
 
             List<FalloutMsg> MsgFiles = new List<FalloutMsg>();
             foreach( string fname in files )
@@ -373,22 +357,15 @@ namespace ScanMsg
                 if( report.Length > 0 )
                     Report( report );
                 else if( status != FalloutMsg.LoadStatus.OK )
-                    Report( "missing report for error<" + status.ToString() + "> [" + file + "]" );
+                    Report( $"missing report for error<{status.ToString()}> [{file}]" );
             }
-
-            /*
-            foreach( FalloutMsg msg in MsgFiles )
-            {
-                Report( "###" );
-                Report( "### " + msg.Filename );
-                Report( "###" );
-                Report( msg.AsString() );
-            }
-            */
         }
 
         public static void Report( string report = "" )
         {
+            if( Debugger.IsAttached && Debugger.IsLogging() )
+                Debugger.Log( 0, null, report + Environment.NewLine );
+
             Console.WriteLine( report );
             File.AppendAllText( ReportFile, report + Environment.NewLine );
         }
