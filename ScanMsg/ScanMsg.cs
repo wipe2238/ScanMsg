@@ -17,7 +17,9 @@ namespace ScanMsg
             FileDoesNotExists,
             FileIsEmpty,
             ExtraBracket,
+            TextBeforeBracket,
             TextBetweenBracket,
+            TextAfterBracket,
             InvalidId,
             DuplicatedId,
             TextTooLong,
@@ -179,15 +181,15 @@ namespace ScanMsg
                 // Yeah, yeah... I KNOW ;D
                 string pattern =
                     "^" +
-                    "(?<out1>.*?)" +
+                    "(?<outFirst>.*?)" +
                     "(?<bracket1>{)" +
                     "(?<id>.*)" +
                     "(?<bracket2>})" +
-                    "(?<out2>.*?)" +
+                    "(?<out1>.*?)" +
                     "(?<bracket3>{)" +
                     "(?<sound>.*)" +
                     "(?<bracket4>})" +
-                    "(?<out3>.*?)" +
+                    "(?<out2>.*?)" +
                     "(?<bracket5>{)" +
                     "(?<text>.*)";
 
@@ -216,14 +218,41 @@ namespace ScanMsg
                     return false;
                 }
 
-                foreach( string group in new string[] { "out2", "out3" } )
+                foreach( string group in new string[] { "outFirst", "out1", "out2", "outLast" } )
                 {
                     if( match.Groups[group].Value.Length > 0 )
                     {
-                        report = new string( '-', match.Groups[group].Index ) + "^ text between brackets";
-                        status = LoadStatus.TextBetweenBracket;
+                        bool err = true;
 
-                        return false;
+                        // skip text before/after brackets if it starts with '#'
+                        // should throw error imho, but good lock telling that to decades of hand-edited files :)
+                        if( (group == "outFirst" || group == "outLast") &&
+                            match.Groups[group].Value.TrimStart( ' ', '\t' ).StartsWith( "#" ) )
+                            err = false;
+
+                        if( err )
+                        {
+                            string where = null;
+
+                            switch( group )
+                            {
+                                case "outFirst":
+                                    where = "before";
+                                    status = LoadStatus.TextBeforeBracket;
+                                    break;
+                                case "outLast":
+                                    where = "after";
+                                    status = LoadStatus.TextAfterBracket;
+                                    break;
+                                default:
+                                    where = "between";
+                                    status = LoadStatus.TextBetweenBracket;
+                                    break;
+                            }
+                            report = new string( '-', match.Groups[group].Index ) + $"^ text {where} brackets";
+
+                            return false;
+                        }
                     }
                 }
 

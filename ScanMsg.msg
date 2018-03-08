@@ -17,9 +17,10 @@ duplicate}
 {10}{}{multiline
 duplicate}
 
-zero{21}two{three!}four{five!}six
-zero{22}{three!}four{five!}six
-zero{23}{three!}{five!}six
+zero{20}{three!}{five!}
+{21}two{three!}{five!}
+{22}{three!}four{five!}
+{23}{three!}{five!}six
 
 #{51}{}{one}
 {52}{}#{two}
