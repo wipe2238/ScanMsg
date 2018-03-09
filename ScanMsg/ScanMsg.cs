@@ -14,6 +14,7 @@ namespace ScanMsg
         public enum LoadStatus
         {
             OK,
+            FileNameInvalid,
             FileDoesNotExists,
             FileIsEmpty,
             ExtraBracket,
@@ -101,7 +102,13 @@ namespace ScanMsg
 
         public LoadStatus Load( ref string report )
         {
-            if( !File.Exists( Filename ) )
+            if( string.IsNullOrEmpty( Filename ) )
+            {
+                report = "invalid filename";
+
+                return LoadStatus.FileNameInvalid;
+            }
+            else if( !File.Exists( Filename ) )
             {
                 report = $"file does not exists [{Filename}]";
 
@@ -222,15 +229,15 @@ namespace ScanMsg
                 {
                     if( match.Groups[group].Value.Length > 0 )
                     {
-                        bool err = true;
+                        bool error = true;
 
                         // skip text before/after brackets if it starts with '#'
-                        // should throw error imho, but good lock telling that to decades of hand-edited files :)
+                        // should report error imho, but good luck telling that to decades of hand-edited files :)
                         if( (group == "outFirst" || group == "outLast") &&
                             match.Groups[group].Value.TrimStart( ' ', '\t' ).StartsWith( "#" ) )
-                            err = false;
+                            error = false;
 
-                        if( err )
+                        if( error )
                         {
                             string where = null;
 
