@@ -15,6 +15,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{4D34C61F-B
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		LICENSE.md = LICENSE.md
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CI", "CI", "{13694907-1C4D-4A7D-9444-95A518B2FFEC}"
+	ProjectSection(SolutionItems) = preProject
+		.appveyor.yml = .appveyor.yml
 	EndProjectSection
 EndProject
 Global

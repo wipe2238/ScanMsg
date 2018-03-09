@@ -129,7 +129,7 @@ namespace ScanMsg
             foreach( string fileLine in fileLines )
             {
                 number++;
-                string line = fileLine.Replace( "\t", " " );
+                string line = fileLine.Replace( "\t", " " ).Replace( "\r", "" );
 
                 LoadStatus status = LoadStatus.OK;
                 string lineReport = "";
@@ -378,7 +378,6 @@ namespace ScanMsg
             string[] files = Directory.GetFiles( ".", "*.msg", SearchOption.AllDirectories ).OrderBy( f => f ).ToArray();
             Console.WriteLine( $" {files.Length} found" );
 
-            List<FalloutMsg> MsgFiles = new List<FalloutMsg>();
             foreach( string fname in files )
             {
                 string report = "";
@@ -386,9 +385,6 @@ namespace ScanMsg
 
                 FalloutMsg msg = new FalloutMsg( file );
                 FalloutMsg.LoadStatus status = msg.Load( ref report );
-
-                if( status == FalloutMsg.LoadStatus.OK )
-                    MsgFiles.Add( msg );
 
                 if( report.Length > 0 )
                     Report( report );
@@ -403,7 +399,8 @@ namespace ScanMsg
                 Debugger.Log( 0, null, report + Environment.NewLine );
 
             Console.WriteLine( report );
-            File.AppendAllText( ReportFile, report + Environment.NewLine );
+            if( !string.IsNullOrEmpty( ReportFile ) )
+                File.AppendAllText( ReportFile, report + Environment.NewLine );
         }
     }
 }
