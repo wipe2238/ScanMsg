@@ -88,6 +88,9 @@ namespace ScanMsg
         public Dictionary<uint,MsgEntry> Msg = new Dictionary<uint,MsgEntry>();
         protected uint MsgLast = 0;
 
+        private const int MaxTextLen = 1024;
+        private const int MaxWordLen = 53;
+
         public FalloutMsg( string filename )
         {
             Filename = filename;
@@ -167,15 +170,29 @@ namespace ScanMsg
                     }
 
                     int len = Msg[MsgLast].TextLen + match.Groups["text"].Value.Length;
-                    if( len > 1024 )
+                    if( len > MaxTextLen )
                     {
-                        report = new string( '-', 1024 - Msg[MsgLast].TextLen ) + "^ text too long (multiline)";
+                        report = new string( '-', MaxTextLen - Msg[MsgLast].TextLen ) + "^ text too long (multiline)";
                         status = LoadStatus.TextTooLong;
 
                         return false;
                     }
 
                     line = match.Groups["text"].Value;
+                }
+
+                if( line.Length > MaxWordLen )
+                {
+                    Regex wre = new Regex( "(\\w){" + MaxWordLen + ",}" );
+                    Match wmatch = wre.Match( line );
+
+                    if( wmatch.Success )
+                    {
+                        report = new string( '-', wmatch.Groups[0].Index + MaxWordLen ) + "^ word too long (multiline)";
+                        status = LoadStatus.TextTooLong;
+
+                        return false;
+                    }
                 }
 
                 Msg[MsgLast].Text.Add( line );
@@ -263,12 +280,26 @@ namespace ScanMsg
                     }
                 }
 
-                if( match.Groups["text"].Value.Length > 1024 )
+                if( match.Groups["text"].Value.Length > MaxTextLen )
                 {
-                    report = new string( '-', match.Groups["text"].Index + 1024 ) + "^ text too long";
+                    report = new string( '-', match.Groups["text"].Index + MaxTextLen ) + "^ text too long";
                     status = LoadStatus.TextTooLong;
 
                     return false;
+                }
+
+                if( match.Groups["text"].Value.Length > MaxWordLen )
+                {
+                    Regex wre = new Regex( "(\\w){" + MaxWordLen + ",}" );
+                    Match wmatch = wre.Match( match.Groups["text"].Value );
+
+                    if( wmatch.Success )
+                    {
+                        report = new string( '-', match.Groups["text"].Index + wmatch.Groups[0].Index + MaxWordLen ) + "^ word too long";
+                        status = LoadStatus.TextTooLong;
+
+                        return false;
+                    }
                 }
 
                 // always last
