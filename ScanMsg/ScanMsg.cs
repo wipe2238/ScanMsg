@@ -419,7 +419,7 @@ namespace ScanMsg
 
     public class ScanMsg
     {
-        public static string ReportFile = "ScanMsg.log";
+        private static string ReportFile = "ScanMsg.log";
 
         private static void Main( string[] args )
         {
