@@ -21,6 +21,7 @@ namespace ScanMsg
             TextBeforeBracket,
             TextBetweenBracket,
             TextAfterBracket,
+            InvalidFormat,
             InvalidId,
             DuplicatedId,
             TextTooLong,
@@ -85,7 +86,7 @@ namespace ScanMsg
         }
 
         public readonly string Filename;
-        public Dictionary<uint,MsgEntry> Msg = new Dictionary<uint,MsgEntry>();
+        public Dictionary<uint, MsgEntry> Msg = new Dictionary<uint, MsgEntry>();
         protected uint MsgLast = 0;
 
         private const int MaxTextLen = 1024;
@@ -217,6 +218,7 @@ namespace ScanMsg
                     "(?<bracket5>{)" +
                     "(?<text>.*)";
 
+                // check for single line
                 if( !processed )
                 {
                     re = new Regex( pattern + "(?<bracketLast>})(?<outLast>.*?)$" );
@@ -224,6 +226,7 @@ namespace ScanMsg
                     processed = match.Success;
                 }
 
+                // check for multiline
                 if( !processed )
                 {
                     re = new Regex( pattern + "$" );
@@ -231,8 +234,24 @@ namespace ScanMsg
                     processed = multi = match.Success;
                 }
 
+                // check for empty lines and comments
                 if( !processed )
-                    return true;
+                {
+                    string trimLine = line.Trim( ' ', '\t', '\r' );
+                    if( trimLine.Length == 0 )
+                        return true;
+
+                    if( trimLine.StartsWith( "#" ) ) // || trimLine.StartsWith(';') || trimLine.StartsWith("//"))
+                        return true;
+                }
+
+                // give up
+                if( !processed )
+                {
+                    status = LoadStatus.InvalidFormat;
+                    report = "^ invalid format";
+                    return false;
+                }
 
                 stripped = MergeGroups( re, match, "bracket" );
                 if( !CheckBrackets( stripped, ref report ) )
@@ -251,7 +270,10 @@ namespace ScanMsg
                         // skip text before/after brackets if it starts with '#'
                         // should report error imho, but good luck telling that to decades of hand-edited files :)
                         if( (group == "outFirst" || group == "outLast") &&
-                            match.Groups[group].Value.TrimStart( ' ', '\t' ).StartsWith( "#" ) )
+                            match.Groups[group].Value.Trim( ' ', '\t', '\r' ).StartsWith( "#" ) )
+                            error = false;
+                        // skip blanks before/between/after brackets
+                        else if( match.Groups[group].Value.Trim( ' ', '\t', '\r' ).Length == 0 )
                             error = false;
 
                         if( error )
@@ -406,7 +428,18 @@ namespace ScanMsg
             if( File.Exists( ReportFile ) )
                 File.Delete( ReportFile );
 
-            string[] files = Directory.GetFiles( ".", "*.msg", SearchOption.AllDirectories ).OrderBy( f => f ).ToArray();
+            string dir = ".";
+            if( args.Length >= 1 )
+            {
+                dir = args[0];
+                if( !Directory.Exists( dir ) )
+                {
+                    Console.WriteLine( "Invalid directory" );
+                    Environment.Exit( 1 );
+                }
+            }
+
+            string[] files = Directory.GetFiles( dir, "*.msg", SearchOption.AllDirectories ).OrderBy( f => f ).ToArray();
             Console.WriteLine( $" {files.Length} found" );
 
             foreach( string fname in files )
