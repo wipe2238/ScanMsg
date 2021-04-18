@@ -1,0 +1,44 @@
+name: Build
+
+on:
+ push:
+  paths:
+  - '.github/workflows/Build.yml'
+  - '**.sln'
+  - '**.csproj'
+  - '**.cs'
+  - 'App.config'
+ pull_request:
+  paths:
+  - '.github/workflows/Build.yml'
+  - '**.sln'
+  - '**.csproj'
+  - '**.cs'
+  - 'App.config'
+
+env:
+ DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+defaults:
+ run:
+  shell: bash
+
+jobs:
+
+ ScanMsg:
+  runs-on: windows-latest
+
+  steps:
+
+  - name: Clone
+    uses: actions/checkout@v2
+
+  - name:  Config
+    run:   echo MSBUILD_EXE="$("/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" -latest -requires Microsoft.Component.MSBuild -find MSBuild/**/Bin/MSBuild.exe)" >> $GITHUB_ENV
+    shell: bash
+
+  - name:  Build
+    run:   |
+           :
+           "$MSBUILD_EXE" ScanMsg.sln -p:Configuration=Release
+    shell: bash
