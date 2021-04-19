@@ -97,13 +97,6 @@ namespace ScanMsg
             Filename = filename;
         }
 
-        public LoadStatus Load()
-        {
-            string dummy = "";
-
-            return Load( ref dummy );
-        }
-
         public LoadStatus Load( ref string report )
         {
             if( string.IsNullOrEmpty( Filename ) )
@@ -457,7 +450,7 @@ namespace ScanMsg
             }
         }
 
-        public static void Report( string report = "" )
+        private static void Report( string report = "" )
         {
             if( Debugger.IsAttached && Debugger.IsLogging() )
                 Debugger.Log( 0, null, report + Environment.NewLine );
