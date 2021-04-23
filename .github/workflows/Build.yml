@@ -25,7 +25,7 @@ defaults:
 
 jobs:
 
- ScanMsg:
+ Framework:
   runs-on: windows-latest
 
   steps:
@@ -35,10 +35,21 @@ jobs:
 
   - name:  Config
     run:   echo MSBUILD_EXE="$("/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" -latest -requires Microsoft.Component.MSBuild -find MSBuild/**/Bin/MSBuild.exe)" >> $GITHUB_ENV
-    shell: bash
 
   - name:  Build
     run:   |
            :
-           "$MSBUILD_EXE" ScanMsg.sln -p:Configuration=Release
-    shell: bash
+           "$MSBUILD_EXE" ScanMsg.sln -p:Configuration=Release -target:ScanMsg
+
+ NET5:
+  runs-on: ubuntu-latest
+
+  steps:
+
+  - name: Clone
+    uses: actions/checkout@v2
+
+  - name: Build
+          |
+          :
+          dotnet build --configuration Release ScanMsg/ScanMsg.NET5.csproj

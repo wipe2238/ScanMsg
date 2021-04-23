@@ -1,0 +1,26 @@
+<Project>
+  <PropertyGroup>
+    <Version>0.5</Version>
+    <TargetFramework>net5.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <BaseOutputPath>Build\.NET5</BaseOutputPath>
+    <BaseIntermediateOutputPath>Build\.NET5</BaseIntermediateOutputPath>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
+  <PropertyGroup>
+    <PublishTrimmed>true</PublishTrimmed>
+  </PropertyGroup>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+  <ItemGroup>
+    <Compile Remove="Build\**" />
+    <Compile Remove="Properties\**" />
+    <EmbeddedResource Remove="Build\**" />
+    <EmbeddedResource Remove="Properties\**" />
+    <None Remove="Build\**" />
+    <None Remove="Properties\**" />
+  </ItemGroup>
+</Project>

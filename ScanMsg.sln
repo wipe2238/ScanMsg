@@ -23,6 +23,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CI", "CI", "{13694907-1C4D-
 		.github\workflows\Build.yml = .github\workflows\Build.yml
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScanMsg.NET5", "ScanMsg\ScanMsg.NET5.csproj", "{E8A10A96-30E3-401B-A796-7CBBB1CF7D3A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{AF52633C-E8FB-4A78-9398-309979E84CA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF52633C-E8FB-4A78-9398-309979E84CA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF52633C-E8FB-4A78-9398-309979E84CA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8A10A96-30E3-401B-A796-7CBBB1CF7D3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8A10A96-30E3-401B-A796-7CBBB1CF7D3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8A10A96-30E3-401B-A796-7CBBB1CF7D3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8A10A96-30E3-401B-A796-7CBBB1CF7D3A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

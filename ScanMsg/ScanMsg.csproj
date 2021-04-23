@@ -16,8 +16,8 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>Build\Debug\</OutputPath>
-    <BaseIntermediateOutputPath>Build\Trash\</BaseIntermediateOutputPath>
+    <OutputPath>Build\Framework\Debug\</OutputPath>
+    <BaseIntermediateOutputPath>Build\Framework\Trash\</BaseIntermediateOutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -26,8 +26,8 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>Build\Release\</OutputPath>
-    <BaseIntermediateOutputPath>Build\Trash\</BaseIntermediateOutputPath>
+    <OutputPath>Build\Framework\Release\</OutputPath>
+    <BaseIntermediateOutputPath>Build\Framework\Trash\</BaseIntermediateOutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>

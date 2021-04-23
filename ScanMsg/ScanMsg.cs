@@ -479,7 +479,17 @@ namespace ScanMsg
 
             Console.WriteLine( report );
             if( !string.IsNullOrEmpty( ReportFile ) )
-                File.AppendAllText( ReportFile, report + Environment.NewLine );
+            {
+                try
+                {
+                    File.AppendAllText( ReportFile, report + Environment.NewLine );
+                }
+                catch
+                {
+                    // disables file logging if anything goes wrong
+                    ReportFile = "";
+                }
+            }
         }
     }
 }
