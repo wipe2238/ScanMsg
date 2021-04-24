@@ -280,15 +280,19 @@ namespace ScanMsg
                 {
                     if( match.Groups[group].Value.Length > 0 )
                     {
-                        bool error = true;
+                        bool error = true, outFirstOrLast = (group == "outFirst" || group == "outLast");
+                        string trimLine = match.Groups[group].Value.Trim( ' ', '\t', '\r' );
 
                         // skip text before/after brackets if it starts with '#'
                         // should report error imho, but good luck telling that to decades of hand-edited files :)
-                        if( (group == "outFirst" || group == "outLast") &&
-                            match.Groups[group].Value.Trim( ' ', '\t', '\r' ).StartsWith( "#" ) )
+                        if( outFirstOrLast && trimLine.StartsWith( "#" ) )
                             error = false;
                         // skip blanks before/between/after brackets
-                        else if( match.Groups[group].Value.Trim( ' ', '\t', '\r' ).Length == 0 )
+                        else if( trimLine.Length == 0 )
+                            error = false;
+
+                        // in relaxed mode, skip text before/after brackets if it starts with ';' or '//'
+                        if( error && ScanMsg.Options.Relaxed && outFirstOrLast && (trimLine.StartsWith( ";" ) || trimLine.StartsWith( "//" )) )
                             error = false;
 
                         if( error )
@@ -435,24 +439,41 @@ namespace ScanMsg
     public class ScanMsg
     {
         private static string ReportFile = "ScanMsg.log";
+        public static class Options
+        {
+            public static bool Relaxed = false;
+        }
 
         private static void Main( string[] args )
         {
+            string dir = ".";
+
+            foreach( string arg in args )
+            {
+                if( arg.StartsWith( "--" ) )
+                {
+                    switch( arg.Substring( 2 ) )
+                    {
+                        case "relaxed":
+                            Options.Relaxed = true;
+                            break;
+                    }
+                }
+                else
+                {
+                    dir = args[0];
+                    if( !Directory.Exists( dir ) )
+                    {
+                        Console.WriteLine( "Invalid directory" );
+                        Environment.Exit( 1 );
+                    }
+                }
+            }
+
             Console.Write( "Scanning files..." );
 
             if( File.Exists( ReportFile ) )
                 File.Delete( ReportFile );
-
-            string dir = ".";
-            if( args.Length >= 1 )
-            {
-                dir = args[0];
-                if( !Directory.Exists( dir ) )
-                {
-                    Console.WriteLine( "Invalid directory" );
-                    Environment.Exit( 1 );
-                }
-            }
 
             string[] files = Directory.GetFiles( dir, "*.msg", SearchOption.AllDirectories ).OrderBy( f => f ).ToArray();
             Console.WriteLine( $" {files.Length} found" );
