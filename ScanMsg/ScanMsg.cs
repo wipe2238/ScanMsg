@@ -46,7 +46,7 @@ namespace ScanMsg
             InvalidFormat,
             InvalidId,
             DuplicatedId,
-            TextTooLong,
+            TextTooLong
         }
 
         public class MsgEntry
@@ -352,7 +352,7 @@ namespace ScanMsg
                     return false;
                 }
 
-                if( id > 0 && Msg.ContainsKey( id ) )
+                if( Msg.ContainsKey( id ) )
                 {
                     report = new string( '-', match.Groups["id"].Index ) + "^ duplicated id";
                     report += " (previous: {" + id + "}" + Msg[id].AsString( 15 ) + ")";
@@ -438,11 +438,12 @@ namespace ScanMsg
 
     public class ScanMsg
     {
-        private static string ReportFile = "ScanMsg.log";
         public static class Options
         {
             public static bool Relaxed = false;
         }
+
+        private static string ReportFile = "ScanMsg.log";
 
         private static void Main( string[] args )
         {
@@ -464,7 +465,7 @@ namespace ScanMsg
                     dir = args[0];
                     if( !Directory.Exists( dir ) )
                     {
-                        Console.WriteLine( "Invalid directory" );
+                        Console.WriteLine( $"ERROR: Invalid directory {dir}" );
                         Environment.Exit( 1 );
                     }
                 }
@@ -501,7 +502,7 @@ namespace ScanMsg
                 if( report.Length > 0 )
                     Report( report );
                 else if( status != FalloutMsg.LoadStatus.OK )
-                    Report( $"missing report for error<{status.ToString()}> [{file}]" );
+                    Report( $"WARNING: missing report for error<{status.ToString()}> [{file}]" );
             }
         }
 
@@ -512,17 +513,17 @@ namespace ScanMsg
 
             Console.WriteLine( report );
 
-            if( !string.IsNullOrEmpty( ReportFile ) )
+            if( string.IsNullOrEmpty( ReportFile ) )
+                return;
+
+            try
             {
-                try
-                {
-                    File.AppendAllText( ReportFile, report + Environment.NewLine );
-                }
-                catch
-                {
-                    Console.WriteLine( $"WARNING: cannot update {ReportFile}" );
-                    ReportFile = "";
-                }
+                File.AppendAllText( ReportFile, report + Environment.NewLine );
+            }
+            catch
+            {
+                Console.WriteLine( $"WARNING: cannot update {ReportFile}" );
+                ReportFile = "";
             }
         }
     }
