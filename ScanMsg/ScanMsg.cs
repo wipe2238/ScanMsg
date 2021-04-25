@@ -470,18 +470,30 @@ namespace ScanMsg
                 }
             }
 
+            if( File.Exists( ReportFile ) )
+            {
+                try
+                {
+                    File.Delete( ReportFile );
+                }
+                catch
+                {
+                    Console.WriteLine( $"WARNING: cannot delete previous created {ReportFile}" );
+                    ReportFile = "";
+                }
+            }
+
             Console.Write( "Scanning files..." );
 
-            if( File.Exists( ReportFile ) )
-                File.Delete( ReportFile );
-
-            string[] files = Directory.GetFiles( dir, "*.msg", SearchOption.AllDirectories ).OrderBy( f => f ).ToArray();
+            string[] files = Directory.GetFiles( dir, "*.*", SearchOption.AllDirectories ).Where( file => file.ToLower().EndsWith( ".msg" ) ).OrderBy( f => f ).ToArray();
             Console.WriteLine( $" {files.Length} found" );
 
             foreach( string fname in files )
             {
                 string report = "";
-                string file = fname.TrimStart( '.', '/', '\\' );
+                string file = fname;
+                if( file.StartsWith( ".\\" ) || file.StartsWith( "./" ) )
+                    file = file.Substring( 2 );
 
                 FalloutMsg msg = new FalloutMsg( file );
                 FalloutMsg.LoadStatus status = msg.Load( ref report );
@@ -493,12 +505,13 @@ namespace ScanMsg
             }
         }
 
-        private static void Report( string report = "" )
+        private static void Report( string report )
         {
             if( Debugger.IsAttached && Debugger.IsLogging() )
                 Debugger.Log( 0, null, report + Environment.NewLine );
 
             Console.WriteLine( report );
+
             if( !string.IsNullOrEmpty( ReportFile ) )
             {
                 try
@@ -507,7 +520,7 @@ namespace ScanMsg
                 }
                 catch
                 {
-                    // disables file logging if anything goes wrong
+                    Console.WriteLine( $"WARNING: cannot update {ReportFile}" );
                     ReportFile = "";
                 }
             }
