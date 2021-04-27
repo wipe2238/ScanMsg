@@ -39,6 +39,7 @@ namespace ScanMsg
             FileNameInvalid,
             FileDoesNotExists,
             FileIsEmpty,
+            FileCannotRead,
             ExtraBracket,
             TextBeforeBracket,
             TextBetweenBracket,
@@ -134,7 +135,18 @@ namespace ScanMsg
                 return LoadStatus.FileDoesNotExists;
             }
 
-            string[] fileLines = File.ReadAllLines( Filename );
+            string[] fileLines;
+            try
+            {
+                fileLines = File.ReadAllLines( Filename );
+            }
+            catch
+            {
+                report = $"file cannot be read [{Filename}]";
+
+                return LoadStatus.FileCannotRead;
+            }
+
             if( fileLines.Length == 0 )
             {
                 report = $"file is empty [{Filename}]";
