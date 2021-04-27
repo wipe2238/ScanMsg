@@ -52,6 +52,7 @@ namespace ScanMsg
 
         public class MsgEntry
         {
+            public readonly uint Id;
             public string Sound;
             public List<string> Text = new List<string>();
             public uint Origin = 0;
@@ -70,8 +71,9 @@ namespace ScanMsg
                 }
             }
 
-            public MsgEntry( string sound, params string[] text )
+            public MsgEntry( uint id, string sound, params string[] text )
             {
+                Id = id;
                 Sound = sound;
                 foreach( string t in text )
                 {
@@ -104,7 +106,7 @@ namespace ScanMsg
                     }
                 }
 
-                return "{" + Sound + "}{" + text + "}";
+                return $"{{{Id}}}{{{Sound}}}{{{text}}}";
             }
         }
 
@@ -367,13 +369,13 @@ namespace ScanMsg
                 if( Msg.ContainsKey( id ) )
                 {
                     report = new string( '-', match.Groups["id"].Index ) + "^ duplicated id";
-                    report += " (previous: {" + id + "}" + Msg[id].AsString( 15 ) + ")";
+                    report += $" (previous: {Msg[id].AsString( 15 )})";
                     status = LoadStatus.DuplicatedId;
 
                     return false;
                 }
 
-                Msg[id] = new MsgEntry( match.Groups["sound"].Value, match.Groups["text"].Value );
+                Msg[id] = new MsgEntry( id, match.Groups["sound"].Value, match.Groups["text"].Value );
                 MsgLast = id;
             }
 
@@ -433,19 +435,6 @@ namespace ScanMsg
 
             return id;
         }
-
-        public string AsString()
-        {
-            string result = "";
-
-            foreach( KeyValuePair<uint, MsgEntry> kv in Msg.OrderBy( d => d.Key ) )
-            {
-                result += "{" + kv.Key + "}" + kv.Value.AsString();
-                result += Environment.NewLine;
-            }
-
-            return result;
-        }
     }
 
     public class ScanMsg
@@ -456,11 +445,155 @@ namespace ScanMsg
         }
 
         private static string ReportFile = "ScanMsg.log";
+        private static int ReportCount = 0;
 
-        private static void Main( string[] args )
+        private static int Main( string[] args )
+        {
+            if( File.Exists( ReportFile ) )
+            {
+                try
+                {
+                    File.Delete( ReportFile );
+                }
+                catch
+                {
+                    Console.WriteLine( $"WARNING: cannot delete previous created {ReportFile}" );
+                    ReportFile = "";
+                }
+            }
+
+            if( args.Length > 0 && args[0] == "--language-base" )
+                MainLang( args.ToList() );
+            else
+                MainScan( args.ToList() );
+
+            return ReportCount;
+
+        }
+
+        private static void MainLang( List<string> args )
+        {
+            string usage = "USAGE: ScanMsg --language-base [path/to/text/language] --translations [path/to/text/translation1] <path/to/text/translation2> ...";
+
+            if( args.Count < 4 )
+            {
+                Report( usage );
+                return;
+            }
+            else if( args[0] != "--language-base" || args[2] != "--translations" )
+            {
+                Report( usage );
+                return;
+            }
+
+            args.RemoveAt( 0 ); // --language-base
+            args.RemoveAt( 1 ); // --translations
+
+            for( int d = 0, dLen = args.Count; d < dLen; d++ )
+            {
+                if( !Directory.Exists( args[d] ) )
+                {
+                    Report( $"ERROR: Invalid directory {args[d]}" );
+                    return;
+                }
+                args[d] = args[d].Replace( '\\', '/' ).Replace( '/', Path.DirectorySeparatorChar );
+            }
+
+            Console.Write( "Scanning files..." );
+
+            string baseDir = args[0];
+            args.RemoveAt( 0 ); // base language
+
+            List<string> baseFiles = Directory.GetFiles( baseDir, "*.*", SearchOption.AllDirectories ).Where( file => file.ToLower().EndsWith( ".msg" ) ).OrderBy( f => f ).Select( file => { return file.Substring( baseDir.Length ).TrimStart( '/', '\\' ); } ).ToList();
+            Console.WriteLine( $" {baseFiles.Count} found" );
+
+            Dictionary<string, FalloutMsg> baseLang = new Dictionary<string, FalloutMsg>();
+
+            foreach( string langDir in args )
+            {
+                foreach( string baseFile in baseFiles )
+                {
+                    string file = Path.Combine( langDir, baseFile );
+                    if( file.StartsWith( ".\\" ) || file.StartsWith( "./" ) )
+                        file = file.Substring( 2 );
+
+                    if( !File.Exists( file ) )
+                    {
+                        Report( $"file does not exists [{file}]" );
+                        continue;
+                    }
+
+                    string report = "";
+
+                    FalloutMsg baseMsg, langMsg;
+                    FalloutMsg.LoadStatus status;
+
+                    if( baseLang.ContainsKey( baseFile ) )
+                        baseMsg = baseLang[baseFile];
+                    else
+                    {
+                        baseMsg = new FalloutMsg( Path.Combine( baseDir, baseFile ) );
+                        status = baseMsg.Load( ref report );
+
+                        if( report.Length > 0 )
+                            Report( report );
+                        else if( status != FalloutMsg.LoadStatus.OK )
+                            Report( $"WARNING: missing report for error<{status.ToString()}> [{file}]" );
+
+                        // cannot continue if base language .msg contains errors
+                        if( report.Length > 0 || status != FalloutMsg.LoadStatus.OK )
+                            continue;
+
+                        baseLang[baseFile] = baseMsg;
+                        report = "";
+                    }
+
+                    langMsg = new FalloutMsg( file );
+                    status = langMsg.Load( ref report );
+
+                    if( report.Length > 0 )
+                        Report( report );
+                    else if( status != FalloutMsg.LoadStatus.OK )
+                        Report( $"WARNING: missing report for error<{status.ToString()}> [{file}]" );
+
+                    // cannot continue if translation .msg contains errors
+                    if( report.Length > 0 || status != FalloutMsg.LoadStatus.OK )
+                        continue;
+
+                    //
+
+                    foreach( KeyValuePair<uint, FalloutMsg.MsgEntry> kvp in baseMsg.Msg )
+                    {
+                        if( !langMsg.Msg.ContainsKey( kvp.Key ) )
+                        {
+                            Report( $"message id {{{kvp.Key}}} missing [{file}]" );
+                            continue;
+                        }
+
+                        string textBase = string.Join( " ", kvp.Value.Text.ToArray() );
+                        string textLang = string.Join( " ", langMsg.Msg[kvp.Key].Text.ToArray() );
+
+                        if( string.IsNullOrEmpty( textBase ) && !string.IsNullOrEmpty( textLang ) )
+                        {
+                            Report( $"message id {{{kvp.Key}}} should be empty [{file}]" );
+                            // Report( $"base  {textBase}" );
+                            // Report( $"lang  {textLang}" );
+                        }
+                        else if( !string.IsNullOrEmpty( textBase ) && string.IsNullOrEmpty( textLang ) )
+                        {
+                            Report( $"message id {{{kvp.Key}}} should not be empty [{file}]" );
+                            // Report( $"base  {textBase}" );
+                            // Report( $"lang  {textLang}" );
+                        }
+                    }
+                }
+            }
+        }
+
+
+        private static void MainScan( List<string> args )
         {
             string dir = ".";
-
             foreach( string arg in args )
             {
                 if( arg.StartsWith( "--" ) )
@@ -477,22 +610,9 @@ namespace ScanMsg
                     dir = args[0];
                     if( !Directory.Exists( dir ) )
                     {
-                        Console.WriteLine( $"ERROR: Invalid directory {dir}" );
-                        Environment.Exit( 1 );
+                        Report( $"ERROR: Invalid directory {dir}" );
+                        return;
                     }
-                }
-            }
-
-            if( File.Exists( ReportFile ) )
-            {
-                try
-                {
-                    File.Delete( ReportFile );
-                }
-                catch
-                {
-                    Console.WriteLine( $"WARNING: cannot delete previous created {ReportFile}" );
-                    ReportFile = "";
                 }
             }
 
@@ -524,6 +644,7 @@ namespace ScanMsg
                 Debugger.Log( 0, null, report + Environment.NewLine );
 
             Console.WriteLine( report );
+            ReportCount++;
 
             if( string.IsNullOrEmpty( ReportFile ) )
                 return;
