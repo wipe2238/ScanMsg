@@ -64,14 +64,14 @@ runs:
 
           if [[ ! -f "${{ inputs.executable }}" ]]; then
              if [[ "${{ inputs.executable }}" == "upstream" ]]; then
-                echo "::set-output name=executable::dotnet run --project ${{ github.action_path }}/ScanMsg/ScanMsg.NET5.csproj --"
+                echo "::set-output name=executable::dotnet run --project ${GITHUB_ACTION_PATH//\\//}/ScanMsg/ScanMsg.NET5.csproj --"
              else
                 echo "ERROR: invalid input 'executable' : '${{ inputs.executable }}'"
                 echo "ERROR: file does not exists"
                 exit 1
              fi
           else
-             echo "::set-output name=executable::`pwd`/${{ inputs.executable }}"
+             echo "::set-output name=executable::${GITHUB_WORKSPACE//\\//}/${{ inputs.executable }}"
           fi
 
           #
