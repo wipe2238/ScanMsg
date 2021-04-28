@@ -59,7 +59,7 @@ runs:
           fi
 
           if [[ ! -f "${{ inputs.executable }}" ]; then
-             if [[ "${{ inputs.executable }}" == "upstream" ]; then
+             if [[ "${{ inputs.executable }}" == "upstream" ]]; then
                 echo "::set-output name=executable::dotnet run --project $GITHUB_ACTION_PATH/ScanMsg/ScanMsg.NET5.csproj --"
              else
                 echo "ERROR: invalid input 'executable' : '${{ inputs.executable }}'"
