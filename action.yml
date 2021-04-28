@@ -9,7 +9,7 @@ branding:
 #
 # uses: wipe2238/ScanMsg@master
 # with:
-#  path: path/to/text/
+#  path: 'path/to/text/'
 
 # Same as running ScanMsg.exe path/to/text/ --relaxed
 #
@@ -22,21 +22,31 @@ branding:
 #
 # uses: wipe2238/ScanMsg@master
 # with:
-#  path:       path/to/text/
-#  executable: path/to/ScanMsg.exe
+#  path:       'path/to/text/'
+#  executable: 'path/to/ScanMsg.exe'
+
+# Same as running: cd path/to/text/ && ScanMsg.exe
+#
+# uses: wipe2238/ScanMsg@master
+# with:
+#  workdir: 'path/to/text/'
 
 inputs:
   path:
    description: ''
-   required: true
+   required:    false
   relaxed:
    description: ''
    required:    false
    default:     'false'
   executable:
-   description: 'Path to ScanMsg executable; if set to "upstream", '
+   description: ''
    required:    false
    default:     'upstream'
+  workdir:
+   description: ''
+   required:    false
+   default:     ${{ github.workspace }}
 
 
 runs:
@@ -46,12 +56,6 @@ runs:
  - name:  Validate options
    id:    options
    run:   |
-          if [[ ! -d "${{ inputs.path }}" ]]; then
-             echo "ERROR: invalid input 'path' : '${{ inputs.path }}'"
-             echo "ERROR: directory does not exists"
-             exit 1
-          fi
-
           if [[ "${{ inputs.relaxed }}" != "true" ]] && [[ "${{ inputs.relaxed }}" != "false" ]]; then
              echo "ERROR: invalid input 'relaxed' : '${{ inputs.relaxed }}'"
              echo "ERROR: available values: 'true', 'false'"
@@ -64,11 +68,13 @@ runs:
              else
                 echo "ERROR: invalid input 'executable' : '${{ inputs.executable }}'"
                 echo "ERROR: file does not exists"
-                    exit 1
+                exit 1
              fi
           else
              echo "::set-output name=executable::${{ inputs.executable }}"
           fi
+
+          #
 
           if [[ "${{ inputs.relaxed }}" == "true" ]]; then
              echo "::set-output name=relaxed::--relaxed"
@@ -76,9 +82,11 @@ runs:
 
    shell: bash
 
- - name:  Run
-   run:   ${{ steps.options.outputs.executable }} "${{ inputs.path }}" ${{ steps.options.outputs.relaxed }}
+ - name:  Run validation
+   run:   |
+          ${{ steps.options.outputs.executable }} ${{ inputs.path }} ${{ steps.options.outputs.relaxed }}
+          rm -f ScanMsg.log
    shell: bash
-   working-directory: ${{ github.workspace }}
+   working-directory: ${{ inputs.workdir }}
    env:
     DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
