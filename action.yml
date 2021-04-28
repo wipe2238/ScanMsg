@@ -71,7 +71,7 @@ runs:
                 exit 1
              fi
           else
-             echo "::set-output name=executable::${{ inputs.executable }}"
+             echo "::set-output name=executable::${{ github.workspace }}/${{ inputs.executable }}"
           fi
 
           #
