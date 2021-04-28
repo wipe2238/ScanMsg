@@ -71,6 +71,8 @@ runs:
                 exit 1
              fi
           else
+             echo "github.workspace = ${{ github.workspace }}"
+             echo "GITHUB_WORKSPACE = $GITHUB_WORKSPACE"
              echo "::set-output name=executable::$GITHUB_WORKSPACE/${{ inputs.executable }}"
           fi
 
@@ -84,7 +86,7 @@ runs:
 
  - name:  Run validation
    run:   |
-          ${{ steps.options.outputs.executable }} ${{ inputs.path }} ${{ steps.options.outputs.relaxed }}
+          echo ${{ steps.options.outputs.executable }} ${{ inputs.path }} ${{ steps.options.outputs.relaxed }}
           rm -f ScanMsg.log
    shell: bash
    working-directory: ${{ inputs.workdir }}
