@@ -39,6 +39,10 @@ inputs:
    description: ''
    required:    false
    default:     'false'
+  translations:
+   description: ''
+   required:    false
+   default:     ''
   executable:
    description: ''
    required:    false
@@ -77,6 +81,10 @@ runs:
           #
 
           if [[ "${{ inputs.relaxed }}" == "true" ]]; then
+             if [[ "${{ inputs.translations }}" != "" ]]; then
+                echo "ERROR: validating translations in relaxed mode not implemented (yet?)"
+                exit 1
+             fi
              echo "::set-output name=relaxed::--relaxed"
           fi
 
@@ -84,9 +92,14 @@ runs:
 
  - name:  Run validation
    run:   |
-          ${{ steps.options.outputs.executable }} ${{ inputs.path }} ${{ steps.options.outputs.relaxed }}
+          if [[ "${{ input.translations }}" != "" ]]; then
+             ${{ steps.options.outputs.executable }} --language-base ${{ inputs.path }} --translations ${{ inputs.translations }}
+          else
+             ${{ steps.options.outputs.executable }} ${{ inputs.path }} ${{ steps.options.outputs.relaxed }}
+          fi
           rm -f ScanMsg.log
    shell: bash
    working-directory: ${{ inputs.workdir }}
    env:
     DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
+    DOTNET_NOLOGO:               'true'
