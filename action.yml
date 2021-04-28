@@ -92,7 +92,7 @@ runs:
 
  - name:  Run validation
    run:   |
-          if [[ "${{ input.translations }}" != "" ]]; then
+          if [[ "${{ inputs.translations }}" != "" ]]; then
              ${{ steps.options.outputs.executable }} --language-base ${{ inputs.path }} --translations ${{ inputs.translations }}
           else
              ${{ steps.options.outputs.executable }} ${{ inputs.path }} ${{ steps.options.outputs.relaxed }}
