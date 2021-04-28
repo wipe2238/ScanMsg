@@ -1,4 +1,3 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31205.134
@@ -20,6 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{4D34C61F-B
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CI", "CI", "{13694907-1C4D-4A7D-9444-95A518B2FFEC}"
 	ProjectSection(SolutionItems) = preProject
+		action.yml = action.yml
 		.github\workflows\Build.yml = .github\workflows\Build.yml
 	EndProjectSection
 EndProject

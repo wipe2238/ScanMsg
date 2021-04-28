@@ -624,7 +624,7 @@ namespace ScanMsg
             foreach( string fname in files )
             {
                 string report = "";
-                string file = fname;
+                string file = fname.Replace( '\\', '/' ).Replace( '/', Path.DirectorySeparatorChar );
                 if( file.StartsWith( ".\\" ) || file.StartsWith( "./" ) )
                     file = file.Substring( 2 );
 

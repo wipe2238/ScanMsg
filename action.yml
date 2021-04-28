@@ -1,0 +1,84 @@
+name:        'ScanMsg'
+description: 'Fallout .msg files scanner'
+author:      'Rotators'
+branding:
+ icon:  'eye'
+ color: 'green'
+
+# Same as running: ScanMsg.exe path/to/text/
+#
+# uses: wipe2238/ScanMsg@master
+# with:
+#  path: path/to/text/
+
+# Same as running ScanMsg.exe path/to/text/ --relaxed
+#
+# uses: wipe2238/ScanMsg@master
+# with:
+#  path:    'path/to/text/'
+#  relaxed: 'true'
+
+# Same as running: ScanMsg.exe path/to/text/
+#
+# uses: wipe2238/ScanMsg@master
+# with:
+#  path:       path/to/text/
+#  executable: path/to/ScanMsg.exe
+
+inputs:
+  path:
+   description: ''
+   required: true
+  relaxed:
+   description: ''
+   required:    false
+   default:     'false'
+  executable:
+   description: 'Path to ScanMsg executable; if set to "upstream", '
+   required:    false
+   default:     'upstream'
+
+
+runs:
+ using: 'composite'
+ steps:
+
+ - name:  Validate options
+   id:    options
+   run:   |
+          if [[ ! -d "${{ inputs.path }}" ]]; then
+             echo "ERROR: invalid input 'path' : '${{ inputs.path }}'"
+             echo "ERROR: directory does not exists"
+             exit 1
+          fi
+
+          if [[ "${{ inputs.relaxed }}" != "true" ]] && [[ "${{ inputs.relaxed }}" != "false" ]]; then
+             echo "ERROR: invalid input 'relaxed' : '${{ inputs.relaxed }}'"
+             echo "ERROR: available values: 'true', 'false'"
+             exit 1
+          fi
+
+          if [[ ! -f "${{ inputs.executable }}" ]; then
+             if [[ "${{ inputs.executable }} == "upstream" ]; then
+                echo "::set-output name=executable::dotnet run --project $GITHUB_ACTION_PATH/ScanMsg/ScanMsg.NET5.csproj --"
+             else
+                echo "ERROR: invalid input 'executable' : '${{ inputs.executable }}'"
+                echo "ERROR: file does not exists"
+                exit 1
+             fi
+          else
+             echo "::set-output name=executable::${{ inputs.executable }}"
+          fi
+
+          if [[ "${{ inputs.relaxed }}" == "true" ]]; then
+             echo "::set-output name=relaxed::--relaxed"
+          fi
+
+   shell: bash
+
+ - name:  Run
+   run:   ${{ steps.options.outputs.executable }} "${{ inputs.path }}" ${{ steps.options.outputs.relaxed }}
+   shell: bash
+   working-directory: $GIHUB_WORKSPACE
+   env:
+    DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
