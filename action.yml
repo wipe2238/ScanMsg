@@ -60,7 +60,7 @@ runs:
 
           if [[ ! -f "${{ inputs.executable }}" ]]; then
              if [[ "${{ inputs.executable }}" == "upstream" ]]; then
-                echo "::set-output name=executable::dotnet run --project $GITHUB_ACTION_PATH/ScanMsg/ScanMsg.NET5.csproj --"
+                echo "::set-output name=executable::dotnet run --project ${{ github.action_path }}/ScanMsg/ScanMsg.NET5.csproj --"
              else
                 echo "ERROR: invalid input 'executable' : '${{ inputs.executable }}'"
                 echo "ERROR: file does not exists"
@@ -79,6 +79,6 @@ runs:
  - name:  Run
    run:   ${{ steps.options.outputs.executable }} "${{ inputs.path }}" ${{ steps.options.outputs.relaxed }}
    shell: bash
-   working-directory: $GIHUB_WORKSPACE
+   working-directory: ${{ github.workspace }}
    env:
     DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
