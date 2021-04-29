@@ -47,6 +47,7 @@ inputs:
    description: ''
    required:    false
    default:     'upstream'
+   deprecationMessage: 'will be removed in v0.7'
   workdir:
    description: ''
    required:    false

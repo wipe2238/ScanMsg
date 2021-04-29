@@ -156,12 +156,12 @@ namespace ScanMsg
                 return LoadStatus.FileIsEmpty;
             }
 
-            uint number = 0;
+            uint lineNumber = 0;
             bool multi = false;
 
             foreach( string fileLine in fileLines )
             {
-                number++;
+                lineNumber++;
                 string line = fileLine.Replace( "\t", " " ).Replace( "\r", "" );
 
                 LoadStatus status = LoadStatus.OK;
@@ -172,7 +172,7 @@ namespace ScanMsg
                         report += Environment.NewLine;
 
                     report += line + Environment.NewLine;
-                    report += lineReport + $" [{Filename}:{number}]";
+                    report += lineReport + $" [{Filename}:{lineNumber}]";
                 }
             }
 
