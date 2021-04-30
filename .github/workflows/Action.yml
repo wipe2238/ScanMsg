@@ -1,0 +1,27 @@
+name: Action
+
+on:
+ push:
+  paths:
+  - '.github/workflows/Action.yml'
+  - 'action.yml'
+
+defaults:
+ run:
+  shell: bash
+
+jobs:
+
+ Test:
+  runs-on: ${{ matrix.os }}
+  strategy:
+   fail-fast: false
+   matrix:
+    os: [ windows-latest, ubuntu-latest, macOS-latest ]
+
+  steps:
+
+  - name: Test
+    uses: ./
+    with:
+     path: ScanMsg

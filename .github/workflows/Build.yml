@@ -18,6 +18,7 @@ on:
 
 env:
  DOTNET_CLI_TELEMETRY_OPTOUT: true
+ DOTNET_NOLOGO:               true
 
 defaults:
  run:
