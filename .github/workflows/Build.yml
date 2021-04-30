@@ -40,19 +40,19 @@ jobs:
     run:   |
            :
            "$MSBUILD_EXE" ScanMsg.sln -p:Configuration=Release -target:ScanMsg
-           7z a ScanMsg.zip $GITHUB_WORKSPACE/ScanMsg/Build/Framework/Release/ScanMsg.exe
-           7z a ScanMsg.zip $GITHUB_WORKSPACE/ScanMsg/Build/Framework/Release/ScanMsg.msg
-           7z a ScanMsg.zip $GITHUB_WORKSPACE/README.md
-           7z a ScanMsg.zip $GITHUB_WORKSPACE/LICENSE.md
-           7z l ScanMSg.zip
+           mv ScanMsg/Build/Framework/Release/ScanMsg.exe ScanMsg.exe
 
   - name:  Upload
     uses:  actions/upload-artifact@v2
     with:
      name:              ScanMsg
-     path:              ScanMsg.zip
      if-no-files-found: error
      retention-days:    30
+     path:              |
+                        ScanMsg.exe
+                        ScanMsg.msg
+                        README.md
+                        LICENSE.md
 
  NET5:
   runs-on: ubuntu-latest
