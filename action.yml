@@ -35,6 +35,11 @@ inputs:
   path:
    description: ''
    required:    false
+
+  no-exitcode:
+   required:    false
+   default:     'true'
+   description: 'Action will never fail build, even if errors are found'
   relaxed:
    description: ''
    required:    false
@@ -43,16 +48,17 @@ inputs:
    description: ''
    required:    false
    default:     ''
-  executable:
-   description: ''
-   required:    false
-   default:     'upstream'
-   deprecationMessage: 'will be removed in v0.7'
+
   workdir:
    description: ''
    required:    false
    default:     ${{ github.workspace }}
 
+  executable:
+   description: ''
+   required:    false
+   default:     'upstream'
+   deprecationMessage: 'will be removed in v0.7'
 
 runs:
  using: 'composite'
@@ -61,10 +67,20 @@ runs:
  - name:  Validate options
    id:    options
    run:   |
+          if [[ "${{ inputs.no-exitcode }}" != "true" ]] && [[ "${{ inputs.no-exitcode }}" != "false" ]]; then
+             echo "ERROR: invalid input 'no-exitcode' : '${{ inputs.no-exitcode }}'"
+             echo "ERROR: available values: 'true', 'false'"
+             exit 1
+          elif [[ "${{ inputs.no-exitcode }}" == "true" ]]; then
+             echo "::set-output name:no-exitcode::--no-exitcode"
+          fi
+
           if [[ "${{ inputs.relaxed }}" != "true" ]] && [[ "${{ inputs.relaxed }}" != "false" ]]; then
              echo "ERROR: invalid input 'relaxed' : '${{ inputs.relaxed }}'"
              echo "ERROR: available values: 'true', 'false'"
              exit 1
+          elif [[ "${{ inputs.relaxed }}" == "true" ]]; then
+             echo "::set-output name=relaxed::--relaxed"
           fi
 
           if [[ ! -f "${{ inputs.executable }}" ]]; then
@@ -81,14 +97,10 @@ runs:
 
           #
 
-          if [[ "${{ inputs.relaxed }}" == "true" ]]; then
-             if [[ "${{ inputs.translations }}" != "" ]]; then
-                echo "ERROR: validating translations in relaxed mode not implemented (yet?)"
-                exit 1
-             fi
-             echo "::set-output name=relaxed::--relaxed"
-          fi
-
+          if [[ "${{ inputs.relaxed }}" == "true" ]] && [[ "${{ inputs.translations }}" != "" ]]; then
+             echo "ERROR: validating translations in relaxed mode not implemented (yet?)"
+             exit 1
+              fi
    shell: bash
 
  - name:  Run validation
@@ -96,7 +108,7 @@ runs:
           if [[ "${{ inputs.translations }}" != "" ]]; then
              ${{ steps.options.outputs.executable }} --language-base ${{ inputs.path }} --translations ${{ inputs.translations }}
           else
-             ${{ steps.options.outputs.executable }} ${{ inputs.path }} ${{ steps.options.outputs.relaxed }}
+             ${{ steps.options.outputs.executable }} ${{ inputs.path }} ${{ steps.options.outputs.relaxed }} ${{ steps.options.outputs.no-exitcode }}
           fi
           rm -f ScanMsg.log
    shell: bash

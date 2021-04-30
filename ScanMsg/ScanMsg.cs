@@ -441,6 +441,7 @@ namespace ScanMsg
     {
         public static class Options
         {
+            public static bool NoExitcode = false;
             public static bool Relaxed = false;
         }
 
@@ -466,6 +467,9 @@ namespace ScanMsg
                 MainLang( args.ToList() );
             else
                 MainScan( args.ToList() );
+
+            if( Options.NoExitcode )
+                return 0;
 
             return ReportCount;
 
@@ -590,36 +594,64 @@ namespace ScanMsg
             }
         }
 
-
         private static void MainScan( List<string> args )
         {
-            string dir = ".";
-            foreach( string arg in args )
+            // extract options leaving only files/directories in place
+            for( int a = 0, aLen = args.Count; a < aLen; a++ )
             {
+                string arg = args[a];
                 if( arg.StartsWith( "--" ) )
                 {
                     switch( arg.Substring( 2 ) )
                     {
+                        case "no-exitcode":
+                            Options.NoExitcode = true;
+                            break;
                         case "relaxed":
                             Options.Relaxed = true;
                             break;
+                        default:
+                            Report( $"Unknown option '{arg}'" );
+                            return;
                     }
-                }
-                else
-                {
-                    dir = args[0];
-                    if( !Directory.Exists( dir ) )
-                    {
-                        Report( $"ERROR: Invalid directory {dir}" );
-                        return;
-                    }
+                    args.RemoveAt( a-- );
+                    aLen--;
                 }
             }
 
+            // if started without arguments, check current directory
+            if( args.Count == 0 )
+                args.Add( "." );
+
             Console.Write( "Scanning files..." );
 
-            string[] files = Directory.GetFiles( dir, "*.*", SearchOption.AllDirectories ).Where( file => file.ToLower().EndsWith( ".msg" ) ).OrderBy( f => f ).ToArray();
-            Console.WriteLine( $" {files.Length} found" );
+            List<string> files = new List<string>();
+            foreach( string arg in args )
+            {
+                FileAttributes attributes;
+                try
+                {
+                    attributes = File.GetAttributes( arg );
+                }
+                catch
+                {
+                    Report( $"ERROR: Cannot access '{arg}' attributes" );
+                    return;
+                }
+
+                // TODO (Linux): `ScanMsg /root` results in crash
+
+                if( (attributes & FileAttributes.Directory) == FileAttributes.Directory )
+                    files.AddRange( Directory.GetFiles( arg, "*.*", SearchOption.AllDirectories ).Where( file => file.ToLower().EndsWith( ".msg" ) ).OrderBy( f => f ) );
+                else if( File.Exists( arg ) )
+                    files.Add( arg );
+                else
+                {
+                    Report( $"ERROR: Invalid target '{arg}'" );
+                    return;
+                }
+            }
+            Console.WriteLine( $" {files.Count} found" );
 
             foreach( string fname in files )
             {

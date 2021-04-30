@@ -24,7 +24,49 @@ jobs:
   - name: Clone
     uses: actions/checkout@v2
 
-  - name: Test
+  - name: Empty directory
     uses: ./
     with:
      path: ScanMsg
+
+  #
+
+  - name: Clone RPU
+    uses: actions/checkout@v2
+    with:
+     repository: BGforgeNet/Fallout2_Restoration_Project
+     path:       RPU
+
+  - name: RPU (strict)
+    uses: ./
+    with:
+     no-exitcode: true
+     workdir:      RPU/data/text
+
+  - name: RPU (relaxed)
+    uses: ./
+    with:
+     no-exitcode: true
+     relaxed:     true
+     workdir:     RPU/data/text
+
+  #
+
+  - name: Clone FO2T
+    uses: actions/checkout@v2
+    with:
+     repository: BGforgeNet/FO2Tweaks
+     path:       FO2T
+
+  - name: FO2T (strict)
+    uses: ./
+    with:
+     no-exitcode: true
+     workdir:      FO2T/data/text
+
+  - name: FO2T (relaxed)
+    uses: ./
+    with:
+     no-exitcode: true
+     relaxed:      true
+     workdir:      FO2T/data/text
