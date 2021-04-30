@@ -21,6 +21,9 @@ jobs:
 
   steps:
 
+  - name: Clone
+    uses: actions/checkout@v2
+
   - name: Test
     uses: ./
     with:
