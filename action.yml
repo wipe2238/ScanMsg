@@ -72,7 +72,7 @@ runs:
              echo "ERROR: available values: 'true', 'false'"
              exit 1
           elif [[ "${{ inputs.no-exitcode }}" == "true" ]]; then
-             echo "::set-output name:no-exitcode::--no-exitcode"
+             echo "::set-output name=no-exitcode::--no-exitcode"
           fi
 
           if [[ "${{ inputs.relaxed }}" != "true" ]] && [[ "${{ inputs.relaxed }}" != "false" ]]; then
