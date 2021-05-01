@@ -596,7 +596,7 @@ namespace ScanMsg
 
         private static void MainScan( List<string> args )
         {
-            // extract options leaving only files/directories in place
+            // Extract options, leaving only files/directories in place
             for( int a = 0, aLen = args.Count; a < aLen; a++ )
             {
                 string arg = args[a];

@@ -18,39 +18,51 @@ branding:
 #  path:    'path/to/text/'
 #  relaxed: 'true'
 
-# Same as running: ScanMsg.exe path/to/text/
-#
-# uses: wipe2238/ScanMsg@master
-# with:
-#  path:       'path/to/text/'
-#  executable: 'path/to/ScanMsg.exe'
-
 # Same as running: cd path/to/text/ && ScanMsg.exe
 #
 # uses: wipe2238/ScanMsg@master
 # with:
 #  workdir: 'path/to/text/'
 
+# Same as running: cd data && ScanMsg.exe text/english/
+#
+# uses: wipe2238/ScanMsg@master
+# with:
+#  path:    text/english/
+#  workdir: data
+
 inputs:
   path:
-   description: ''
+   description: >
+                Path to directories/files which should be scanned. If not set, current working directory is used.
    required:    false
 
   no-exitcode:
-   required:    false
-   default:     'true'
-   description: 'Action will never fail build, even if errors are found'
-  relaxed:
-   description: ''
+   description: >
+                If enabled, action will never fail build, even if errors in .msg files are found.
+                Otherwise, action's exitcode equals number of errors.
    required:    false
    default:     'false'
+
+  relaxed:
+   description: >
+                If enabled, some of minor checks will be disabled, allowing to pass mods based on Fallout2 scripts sources.
+                By default
+   required:    false
+   default:     'false'
+
   translations:
-   description: ''
+   description: >
+                Path to one or more directories containing translations.
+
+                If set, 'path' must point to base language (most likely text/english/), which will be used
+                Some inputs are ignored in translations scanning mode ('no-exitcode', 'relaxed').
    required:    false
    default:     ''
 
   workdir:
-   description: ''
+   description: >
+                Working directory.
    required:    false
    default:     ${{ github.workspace }}
 
@@ -72,6 +84,9 @@ runs:
              echo "ERROR: available values: 'true', 'false'"
              exit 1
           elif [[ "${{ inputs.no-exitcode }}" == "true" ]]; then
+             if [[ "${{ input.translations }}" != "" ]]; then
+                echo "[WARNING] Input ignored : 'no-exitcode'"
+             fi
              echo "::set-output name=no-exitcode::--no-exitcode"
           fi
 
@@ -80,6 +95,9 @@ runs:
              echo "ERROR: available values: 'true', 'false'"
              exit 1
           elif [[ "${{ inputs.relaxed }}" == "true" ]]; then
+             if [[ "${{ input.translations }}" != "" ]]; then
+                echo "[WARNING] Input ignored : 'relaxed'"
+             fi
              echo "::set-output name=relaxed::--relaxed"
           fi
 
@@ -94,13 +112,6 @@ runs:
           else
              echo "::set-output name=executable::${GITHUB_WORKSPACE//\\//}/${{ inputs.executable }}"
           fi
-
-          #
-
-          if [[ "${{ inputs.relaxed }}" == "true" ]] && [[ "${{ inputs.translations }}" != "" ]]; then
-             echo "ERROR: validating translations in relaxed mode not implemented (yet?)"
-             exit 1
-              fi
    shell: bash
 
  - name:  Run validation
