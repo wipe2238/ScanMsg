@@ -80,22 +80,22 @@ runs:
    id:    options
    run:   |
           if [[ "${{ inputs.no-exitcode }}" != "true" ]] && [[ "${{ inputs.no-exitcode }}" != "false" ]]; then
-             echo "ERROR: invalid input 'no-exitcode' : '${{ inputs.no-exitcode }}'"
-             echo "ERROR: available values: 'true', 'false'"
+             echo "[ERROR] invalid input 'no-exitcode' : '${{ inputs.no-exitcode }}'"
+             echo "[ERROR] available values: 'true', 'false'"
              exit 1
           elif [[ "${{ inputs.no-exitcode }}" == "true" ]]; then
-             if [[ "${{ input.translations }}" != "" ]]; then
+             if [[ "${{ inputs.translations }}" != "" ]]; then
                 echo "[WARNING] Input ignored : 'no-exitcode'"
              fi
              echo "::set-output name=no-exitcode::--no-exitcode"
           fi
 
           if [[ "${{ inputs.relaxed }}" != "true" ]] && [[ "${{ inputs.relaxed }}" != "false" ]]; then
-             echo "ERROR: invalid input 'relaxed' : '${{ inputs.relaxed }}'"
-             echo "ERROR: available values: 'true', 'false'"
+             echo "[ERROR] invalid input 'relaxed' : '${{ inputs.relaxed }}'"
+             echo "[ERROR] available values: 'true', 'false'"
              exit 1
           elif [[ "${{ inputs.relaxed }}" == "true" ]]; then
-             if [[ "${{ input.translations }}" != "" ]]; then
+             if [[ "${{ inputs.translations }}" != "" ]]; then
                 echo "[WARNING] Input ignored : 'relaxed'"
              fi
              echo "::set-output name=relaxed::--relaxed"
@@ -105,8 +105,8 @@ runs:
              if [[ "${{ inputs.executable }}" == "upstream" ]]; then
                 echo "::set-output name=executable::dotnet run --project ${GITHUB_ACTION_PATH//\\//}/ScanMsg/ScanMsg.NET5.csproj --"
              else
-                echo "ERROR: invalid input 'executable' : '${{ inputs.executable }}'"
-                echo "ERROR: file does not exists"
+                echo "[ERROR] invalid input 'executable' : '${{ inputs.executable }}'"
+                echo "[ERROR] file does not exists"
                 exit 1
              fi
           else
