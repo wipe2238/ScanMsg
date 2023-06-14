@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <BaseOutputPath>Build\.NET5</BaseOutputPath>
     <BaseIntermediateOutputPath>Build\.NET5</BaseIntermediateOutputPath>
