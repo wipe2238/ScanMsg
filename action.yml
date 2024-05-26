@@ -87,7 +87,7 @@ runs:
              if [[ "${{ inputs.translations }}" != "" ]]; then
                 echo "[WARNING] Input ignored : 'no-exitcode'"
              fi
-             echo "::set-output name=no-exitcode::--no-exitcode"
+             echo "no-exitcode=--no-exitcode" >> $GITHUB_OUTPUT
           fi
 
           if [[ "${{ inputs.relaxed }}" != "true" ]] && [[ "${{ inputs.relaxed }}" != "false" ]]; then
@@ -98,19 +98,19 @@ runs:
              if [[ "${{ inputs.translations }}" != "" ]]; then
                 echo "[WARNING] Input ignored : 'relaxed'"
              fi
-             echo "::set-output name=relaxed::--relaxed"
+             echo "relaxed=--relaxed" >> $GITHUB_OUTPUT
           fi
 
           if [[ ! -f "${{ inputs.executable }}" ]]; then
              if [[ "${{ inputs.executable }}" == "upstream" ]]; then
-                echo "::set-output name=executable::dotnet run --project ${GITHUB_ACTION_PATH//\\//}/ScanMsg/ScanMsg.NET5.csproj --"
+                echo "executable=dotnet run --project ${GITHUB_ACTION_PATH//\\//}/ScanMsg/ScanMsg.NET5.csproj --" >> $GITHUB_OUTPUT
              else
                 echo "[ERROR] invalid input 'executable' : '${{ inputs.executable }}'"
                 echo "[ERROR] file does not exists"
                 exit 1
              fi
           else
-             echo "::set-output name=executable::${GITHUB_WORKSPACE//\\//}/${{ inputs.executable }}"
+             echo "executable=${GITHUB_WORKSPACE//\\//}/${{ inputs.executable }}" >> $GITHUB_OUTPUT
           fi
    shell: bash
 
